@@ -116,12 +116,11 @@ void delTree(TTreeNode *root) {
     // root is at "root".
     if (root == NULL)
         return;
-    if (root->left != NULL)
-        delTree(root->left);
-    if (root->right != NULL)
-        delTree(root->right);
+    
+    delTree(root->left);
+    delTree(root->right);
 
-    free(root);
+    freenode(root);
 }
 
 TTreeNode *makeNewNode(char *name, char *phoneNum) {
@@ -175,8 +174,6 @@ void addNode(TTreeNode **root, TTreeNode *node) {
 void freenode(TTreeNode *node) {
     // Frees the memory used by node.
     free(node->name);
-    free(node->left);
-    free(node->right);
     free(node);
 }
 
@@ -186,9 +183,8 @@ void print_inorder(TTreeNode *node) {
     if (node == NULL) {
         return;
     }
-printf("test %s", node->name);
+    
     print_inorder(node->left);
-    printf("Name: %s\n", node->name);
-    printf("Phone Number: %s\n", node->phoneNum);
+    printf("Name: %s    Phone Number: %s\n", node->name, node->phoneNum);
     print_inorder(node->right);
 }
