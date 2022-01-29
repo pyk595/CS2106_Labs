@@ -59,7 +59,7 @@ double reduce() {
 }
 
 
-double flex_reduce(void (*clear)(), void (*op)()){
+double flex_reduce(void (*clear)(), void (*op)(double)){
   int ndx = _rear;
   clear(); // Clear _res to either 0 or 1
   while (ndx != _front) {
