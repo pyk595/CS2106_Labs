@@ -20,7 +20,7 @@ void findNode(char *name, TTreeNode *root, TTreeNode **node, TTreeNode **prevnod
 
     TTreeNode *trav = root;
     TTreeNode *prev = NULL;
-    printf("find");
+    
     while(trav != NULL) {
         int cmp = strcmp(trav->name, name);
 
@@ -97,7 +97,7 @@ void delNode(TTreeNode *node, TTreeNode *prevnode) {
         freenode(node->right);
         return;
     }
-
+    
     // This has children on both nodes
     TTreeNode *smallest, *smallest_parent;
     findSmallest(node->right, &smallest, &smallest_parent);
@@ -114,14 +114,14 @@ void delNode(TTreeNode *node, TTreeNode *prevnode) {
 void delTree(TTreeNode *root) {
     // Implement deleting the entire tree, whose
     // root is at "root".
-    if (root == NULL) {
+    if (root == NULL)
         return;
-    }
-    
-    delTree(root->left);
-    delTree(root->right);
+    if (root->left != NULL)
+        delTree(root->left);
+    if (root->right != NULL)
+        delTree(root->right);
 
-    freenode(root);
+    free(root);
 }
 
 TTreeNode *makeNewNode(char *name, char *phoneNum) {
@@ -175,7 +175,8 @@ void addNode(TTreeNode **root, TTreeNode *node) {
 void freenode(TTreeNode *node) {
     // Frees the memory used by node.
     free(node->name);
-    free(node->phoneNum);
+    free(node->left);
+    free(node->right);
     free(node);
 }
 
@@ -185,7 +186,7 @@ void print_inorder(TTreeNode *node) {
     if (node == NULL) {
         return;
     }
-
+printf("test %s", node->name);
     print_inorder(node->left);
     printf("Name: %s\n", node->name);
     printf("Phone Number: %s\n", node->phoneNum);
