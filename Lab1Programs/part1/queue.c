@@ -58,16 +58,16 @@ double reduce() {
     return _res;
 }
 
-/* Implement flex_reduce here:
+// Implement flex_reduce here:
 
-double flex_reduce(clear, op){
-    // clear(); // Clear _res to either 0 or 1
-	// for every element in queue:
-		//Call op with element.
+double flex_reduce(void (*clear)(), void (*op)(double)) {
+    int ndx = _rear;
+    clear(); // Clear _res to either 0 or 1
 
-	return _res;
+    while(ndx != _front) {
+        op(_queue[ndx]);
+        ndx = (ndx + 1) % MAX_Q_SIZE;
+    }
 
-}
-
-*/
-
+    return _res;
+} 
