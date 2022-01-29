@@ -10,11 +10,11 @@ int main() {
         enq((double) i);
     }
 
-    printf("\nCalling reduce result is %3.2f\n", reduce());
+//    printf("\nCalling reduce result is %3.2f\n", reduce());
 
 /* Uncomment the following two statements to test flex_reduce */
 
-//    printf("Calling flex reduce with sum. Result is %3.2f\n", flex_reduce(clear_sum, sum));
-//    printf("Calling flex reduce with prod. Result is %3.2f\n", flex_reduce(clear_prod, prod));
+    printf("Calling flex reduce with sum. Result is %3.2f\n", flex_reduce(clear_sum, sum));
+    printf("Calling flex reduce with prod. Result is %3.2f\n", flex_reduce(clear_prod, prod));
 }
 
