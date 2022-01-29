@@ -20,7 +20,7 @@ void findNode(char *name, TTreeNode *root, TTreeNode **node, TTreeNode **prevnod
 
     TTreeNode *trav = root;
     TTreeNode *prev = NULL;
-
+    printf("find");
     while(trav != NULL) {
         int cmp = strcmp(trav->name, name);
 
@@ -114,11 +114,28 @@ void delNode(TTreeNode *node, TTreeNode *prevnode) {
 void delTree(TTreeNode *root) {
     // Implement deleting the entire tree, whose
     // root is at "root".
+    if (root == NULL) {
+        return;
+    }
+    
+    delTree(root->left);
+    delTree(root->right);
+
+    freenode(root);
 }
 
 TTreeNode *makeNewNode(char *name, char *phoneNum) {
     // Implement makeNewNode to create a new
     // TTreeNode containing name and phoneNum
+    TTreeNode *tn = (TTreeNode *) malloc(sizeof(TTreeNode));
+    tn->name = (char *) malloc(strlen(name) + 1);
+    strcpy(tn->name, name);
+
+    strcpy(tn->phoneNum, phoneNum);
+
+    tn->left = NULL;
+    tn->right = NULL;
+    return tn;
 }
 
 // Add a new node to the tree. 
@@ -129,13 +146,48 @@ void addNode(TTreeNode **root, TTreeNode *node) {
 
     // Add a new node to the tree, where root is
     // the POINTER to the tree's root.
+    if (*root == NULL) {
+        *root = node;
+        return;
+    }
+    TTreeNode *trav = *root;
+    TTreeNode *prev = NULL;
+
+    while(1) {
+        int cmp = strcmp(trav->name, node->name);
+        prev = trav;
+        if(cmp < 0) {
+            if (trav->right == NULL) {
+                trav->right = node;
+                return;
+            }
+            trav = trav->right;
+        } else {
+            if (trav->left == NULL) {
+                trav->left = node;
+                return;
+            }
+            trav = trav->left;
+        }
+    }
 }
 
 void freenode(TTreeNode *node) {
     // Frees the memory used by node.
+    free(node->name);
+    free(node->phoneNum);
+    free(node);
 }
 
 void print_inorder(TTreeNode *node) {
     // Implement in-order printing of the tree
     // Recursion is probably best here.
+    if (node == NULL) {
+        return;
+    }
+
+    print_inorder(node->left);
+    printf("Name: %s\n", node->name);
+    printf("Phone Number: %s\n", node->phoneNum);
+    print_inorder(node->right);
 }
