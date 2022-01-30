@@ -114,11 +114,22 @@ void delNode(TTreeNode *node, TTreeNode *prevnode) {
 void delTree(TTreeNode *root) {
     // Implement deleting the entire tree, whose
     // root is at "root".
+    if (root == NULL) {
+      return;
+    }
+    delTree(root->left);
+    delTree(root->right);
+    freenode(root);
 }
 
 TTreeNode *makeNewNode(char *name, char *phoneNum) {
-    // Implement makeNewNode to create a new
-    // TTreeNode containing name and phoneNum
+   TTreeNode *node = (TTreeNode *) malloc(sizeof(TTreeNode));
+   node->name = (char *) malloc(strlen(name) + 1);
+   strcpy(node->name, name);
+   strcpy(node->phoneNum, phoneNum);
+   node->left = NULL;
+   node->right = NULL;
+   return node;
 }
 
 // Add a new node to the tree. 
@@ -126,16 +137,51 @@ TTreeNode *makeNewNode(char *name, char *phoneNum) {
 // not the root itself.
 
 void addNode(TTreeNode **root, TTreeNode *node) {
-
     // Add a new node to the tree, where root is
     // the POINTER to the tree's root.
+    if (*root == NULL) {
+      *root = node;
+      return;
+    }
+
+    TTreeNode *trav = *root;
+    
+    while(1) {
+      int cmp = strcmp(trav->name, node->name);
+      if (cmp < 0) {
+        if (trav->right == NULL) {
+          trav->right = node;
+          return;
+        }
+        else {
+          trav = trav->right;
+        }
+      }
+      else {
+        if (trav->left == NULL) {
+          trav->left = node;
+          return;
+        }
+        else {
+          trav = trav->left;
+        }
+      }
+    }
 }
 
 void freenode(TTreeNode *node) {
-    // Frees the memory used by node.
+   free(node->name);
+   free(node);
+  // Frees the memory used by node.
 }
 
 void print_inorder(TTreeNode *node) {
     // Implement in-order printing of the tree
     // Recursion is probably best here.
+    if (node == NULL) {
+      return;
+    }
+    print_inorder(node->left);
+    printf("Name: %s, Phone Number: %s\n", node->name, node->phoneNum);
+    print_inorder(node->right);
 }
