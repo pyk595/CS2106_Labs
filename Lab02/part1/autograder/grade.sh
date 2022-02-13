@@ -1,13 +1,24 @@
 #!/bin/bash
 
 # Check if we have enough arguments
+if [[ $# -ne 1 ]]; then
+  echo "Usage: ./grade.sh <filename>"
+fi
 
 # Delete temporary files
+if [[ -e "ref/*.out" ]]; then
+  rm ref/*.out
+fi
 
 # Compile the reference program
+gcc ref/*.c -o $1
 
 # Generate reference output files
-
+total=0;
+for input in ref/*.in; do
+  total=$(($total+1));
+  ./fun < $input > "${input%%.*}".out;
+done
 # Now mark submissions
 
 #
@@ -21,4 +32,26 @@
     # Compare with reference output files  and award 1 mark if they are identical
 # print score for student
 # print total files marked.
-    
+
+echo -e "Test date and time: $(date +"%A, %d %B %Y, %X")\n" > results.out;
+
+for dir in subs/*; do
+  tmp="${dir##*/}"
+  pts=0
+  gcc "$dir"/*.c -o "$dir"/"$1" 2> /dev/null
+  if [[ $? -ne 0 ]]; then
+    echo "Directory $tmp has a compile error" >> results.out;
+  else
+    for input in ref/*.in; do
+      "$dir"/"$1" < $input > ref/tmp.out 2>&1
+      
+      if diff "${input%%.*}".out ref/tmp.out > /dev/null
+      then
+        pts=$(($pts+1))
+      fi
+    done
+  fi
+  echo "Directory $tmp score $pts/$total" >> results.out;
+done
+
+echo -e "\nProcessed $total files." >> results.out;
