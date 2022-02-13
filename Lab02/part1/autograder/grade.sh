@@ -43,9 +43,12 @@ for dir in subs/*; do
     echo "Directory $tmp has a compile error" >> results.out;
   else
     for input in ref/*.in; do
-      "$dir"/"$1" < $input > ref/tmp.out 2>&1
+      full_file_name="${input##*/}"; # with extension
+      file_name="${full_file_name%%.*}"; # without extension
       
-      if diff "${input%%.*}".out ref/tmp.out > /dev/null
+      "$dir"/"$1" < $input > "$dir"/"$file_name".out 2>&1
+      
+      if diff "${input%%.*}".out "$dir"/"$file_name".out > /dev/null
       then
         pts=$(($pts+1))
       fi
