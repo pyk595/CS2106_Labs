@@ -40,7 +40,7 @@ for dir in subs/*; do
   pts=0
   gcc "$dir"/*.c -o "$dir"/"$1" 2> /dev/null
   if [[ $? -ne 0 ]]; then
-    echo "Directory $tmp has a compile error" >> results.out;
+    echo "Directory $tmp has a compile error." >> results.out;
   else
     for input in ref/*.in; do
       full_file_name="${input##*/}"; # with extension
@@ -54,7 +54,7 @@ for dir in subs/*; do
       fi
     done
   fi
-  echo "Directory $tmp score $pts/$total" >> results.out;
+  echo "Directory $tmp score $pts / $total" >> results.out;
 done
 
 echo -e "\nProcessed $total files." >> results.out;
