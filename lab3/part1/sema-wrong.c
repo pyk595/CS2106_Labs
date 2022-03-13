@@ -15,6 +15,7 @@ int main() {
     sem_init(&sem, 1, 0);
 
     if((pid = fork()) != 0) {
+        sem_wait(&sem);
         printf("Parent! Making my child wait for 1 second.\n");
         sleep(1);
         sem_post(&sem);
