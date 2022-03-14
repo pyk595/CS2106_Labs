@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/wait.h>
+#include <sys/shm.h>
+#include "barrier.h"
 #include "config.h"
 
 #define NUM_PROCESSES  8
@@ -11,8 +13,8 @@
 int main() {
 
     int vect[VECT_SIZE];
-    int pid;
-    int largest[NUM_PROCESSES], smallest[NUM_PROCESSES];
+    int pid, largest_shmid, smallest_shmid;
+    int *largest, *smallest;
 
     float per_process_raw = (float) VECT_SIZE / NUM_PROCESSES;
     int per_process = (int) per_process_raw;
@@ -24,6 +26,11 @@ int main() {
         printf("Vector size of %d is not divisible by %d processes.\n", VECT_SIZE, NUM_PROCESSES);
         exit(-1);
     }
+    largest_shmid = shmget(IPC_PRIVATE, NUM_PROCESSES * sizeof(int), IPC_CREAT | 0600);
+    smallest_shmid = shmget(IPC_PRIVATE, NUM_PROCESSES * sizeof(int), IPC_CREAT | 0600);
+    
+    largest = (int *) shmat(largest_shmid, NULL, 0);
+    smallest = (int *) shmat(smallest_shmid, NULL, 0);
 
     srand(24601);
     int i;
@@ -31,6 +38,8 @@ int main() {
     for(i=0; i<VECT_SIZE; i++) {
         vect[i] = rand();
     }
+
+    init_barrier(NUM_PROCESSES+1);
 
     for(i=0; i<NUM_PROCESSES; i++) {
         pid = fork();
@@ -57,11 +66,12 @@ int main() {
         }
         largest[i] = big;
         smallest[i] = small;
-
+        reach_barrier();
     }
     else 
     {
         start = clock();
+        reach_barrier();
         for(j=0; j<NUM_PROCESSES; j++)
         {
             if(largest[j] > big)
@@ -81,6 +91,12 @@ int main() {
         // Clean up process table
         for(j=0; j<NUM_PROCESSES; j++)
             wait(NULL);
+        destroy_barrier(pid);
+        shmdt(largest);
+        shmdt(smallest);
+        shmctl(largest_shmid, IPC_RMID, 0);
+        shmctl(smallest_shmid, IPC_RMID, 0);
+
     }
 }
 
