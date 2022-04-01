@@ -23,7 +23,7 @@ int main() {
         for(j = i*10; j<i*10 + 10; j++){
             printf("%d ", j);
             fflush(stdout);
-            usleep(250000);
+            usleep(1);
         }
 
         printf("\n\n");

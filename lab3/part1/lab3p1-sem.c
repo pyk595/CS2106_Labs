@@ -15,16 +15,19 @@ int main() {
 
     shmid = shmget(IPC_PRIVATE, NUM_PROCESSES * sizeof(sem_t), IPC_CREAT | 0600);
     sem_arr = (sem_t *) shmat(shmid, NULL, 0);
+ 
+    for(i=0; i<NUM_PROCESSES; i++) {
+        sem_init(&sem_arr[i], 1, 0);
+    }
+
+    sem_post(&sem_arr[0]);
     
     for(i=0; i<NUM_PROCESSES; i++)
     {
         if((pid = fork()) == 0) {
-            sem_init(&sem_arr[i], 1, 0);
             break;
         }
     }
-
-    sem_post(&sem_arr[0]);
 
     if(pid == 0) {
         sem_wait(&sem_arr[i]);
