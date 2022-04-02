@@ -1,4 +1,5 @@
 #define MEMSIZE 64         // Size of memory in bytes
+#define MAPSIZE 8          // Size of bitmap in bytes
 
 // Used by the test harness
 long get_index(void *ptr);
