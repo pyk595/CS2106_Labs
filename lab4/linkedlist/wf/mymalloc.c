@@ -48,13 +48,14 @@ void print_memlist() {
 // Allocates size bytes of memory and returns a pointer
 // to the first byte.
 void *mymalloc(size_t size) {
-
+    // cannot allocate if size > heap size
     if (size > MEMSIZE)
         return NULL;
 
     // add first node if _memlist is null
     init();
 
+    // traverse linked list
     reset_traverser(_memlist, FRONT);
     TNode *node;
     TData *data;
@@ -74,6 +75,7 @@ void *mymalloc(size_t size) {
         }
     } while (node != NULL);
 
+    // if no memory available
     if (!(max_mem_node))
         return NULL;
 
@@ -81,6 +83,7 @@ void *mymalloc(size_t size) {
     data = node->pdata;
     data->occupied = 1;
 
+    // if there is leftover after allocating
     if (data->len > size) {
         size_t leftover = data->len - size;
         unsigned int start_index = node->key + size;
@@ -96,19 +99,36 @@ void *mymalloc(size_t size) {
     return &_heap[node->key];
 }
 
+// free TData
 void free_data(TNode *node) {
     free(node->pdata);
 }
 
 // Frees memory pointer to by ptr.
 void myfree(void *ptr) {
+    // null pointer
+    if (ptr == NULL)
+        return;
+
+    // find linked list node containing the start address
     TNode *node = find_node(_memlist, get_index(ptr));
+    
+    // if memory segment does not exist
+    if (node == NULL)
+        return;
 
     TData *data = node->pdata;
+    
+    // if already not occupied
+    if (!(data->occupied))
+        return;
+
     TNode *pred_node = node->prev;
     TNode *succ_node = node->next;
     TData *t_data;
 
+    // check if preceding node is an unoccupied memory segment
+    // if so, merge it to this node
     if (pred_node != NULL) {
         t_data = pred_node->pdata;
         if (!(t_data->occupied)) {
@@ -120,7 +140,9 @@ void myfree(void *ptr) {
             data = pred_node->pdata;
         }
     }
-
+    
+    // check if succeeding node is an unoccupied memory segment
+    // if so, merge it to this node
     if (succ_node != NULL) {
         t_data = succ_node->pdata;
         if (!(t_data->occupied)) {
@@ -133,7 +155,7 @@ void myfree(void *ptr) {
 
     data->occupied = 0;
     
-    // free the only node if no 
+    // free the only node if no memory is allocated, fixes memory leaks
     if (node->key == 0 && data->len == MEMSIZE && !(data->occupied)) {
         free_data(node);
         delete_node(&_memlist, node);

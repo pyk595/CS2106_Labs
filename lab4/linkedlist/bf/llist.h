@@ -13,7 +13,8 @@ void dbprintf(char *format, ...);
 // val field. It is only used for testlist.c
 
 typedef struct td {
-    int val;
+    char occupied;
+    size_t len;
 } TData;
 
 
