@@ -25,11 +25,11 @@ void print_node(TNode *node) {
 }
 
 void print_memlist() {
-  process_list(_memlist, print_node);
-  if(_memlist->next == NULL && _memlist->pdata->size == MEMSIZE) {
-      free(_memlist->pdata);
-      delete_node(&_memlist, _memlist);
-    }
+  if (_memlist == NULL) {
+    printf("Status: FREE Start index: %u Length: %u\n", 0, MEMSIZE);
+  } else {
+    process_list(_memlist, print_node);
+  }
 }
 
 // Allocates size bytes of memory and returns a pointer
@@ -97,15 +97,14 @@ void myfree(void *ptr) {
   TData *currData = node->pdata;
   TNode *prev = node->prev;
   TNode *successor = node->next;
-  currData->val = 1;
   if (prev != NULL) {
     TData *prevData = prev->pdata;
     if (prevData->val) {
-      currData = prevData;
-      currData->size = currData->size + node->pdata->size;
-      TData *tempData = node->pdata;
-      free(tempData);
+      prevData->size = prevData->size + currData->size;
+      free(node->pdata);
       merge_node(_memlist, node, PRECEDING);
+      currData = prevData;
+      node = prev;
     }
   }
   if (successor != NULL) {
@@ -114,9 +113,15 @@ void myfree(void *ptr) {
       currData->size = currData->size + succData->size;
       free(succData);
       merge_node(_memlist, node, SUCCEEDING);
+    } 
+  }
+  currData->val = 1;
+  if(node->next == NULL && node->pdata->size == MEMSIZE) {
+    if (node->pdata->val) {
+      free(node->pdata);
+      delete_node(&_memlist, node);
+      _memlist = NULL;
     }
-    currData->val = 1;
-    
   }
 }
 
