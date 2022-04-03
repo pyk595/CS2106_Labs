@@ -18,9 +18,9 @@ long get_index(void *ptr) {
 void print_node(TNode *node) {
   TData *data = node->pdata;
   if (data->val) {
-    printf("Status: FREE Start index: %u Length %u\n", node->key, (unsigned int) data->size);
+    printf("Status: FREE Start index: %u Length: %u\n", node->key, (unsigned int) data->size);
   } else {
-    printf("Status: ALLOCATED Start index: %u Length %u\n", node->key, (unsigned int) data->size);
+    printf("Status: ALLOCATED Start index: %u Length: %u\n", node->key, (unsigned int) data->size);
   }
 }
 
@@ -35,6 +35,7 @@ void *mymalloc(size_t size) {
     if (size > MEMSIZE) {
       return NULL;
     }
+    reset_traverser(_memlist, FRONT);
     TData *data = (TData *) malloc(sizeof(TData));
     data->size = size;
     data->val = 0;
@@ -48,16 +49,12 @@ void *mymalloc(size_t size) {
     unusedData->end = MEMSIZE;
     TNode *freeNode = make_node(data->end, unusedData);
     insert_node(&_memlist, freeNode, ASCENDING);
-    printf("This is allocating the first partition. The start index is %u, the size is %u, the end is %u\n",freeNode->key, (unsigned int) unusedData->size, unusedData->end);
     return &_heap[0];
   } else {
     TNode *current = _memlist;
     int count = 1;
     while (current != NULL) {
-      printf("This current node is %d\n", count);
       TData *data = current->pdata;
-      printf("The start index is %u, the size is %u, the end is %u\n",current->key, (unsigned int) data->size, data->end);
-      printf("This val is %d\n", data->val);
 
       if (data->val) {
         if (data->size >= size) {
@@ -84,13 +81,7 @@ void *mymalloc(size_t size) {
           return &_heap[currStart];
         }
       }
-      printf("This is before succ. The start index is %u, the size is %u, the end is %u\n",current->key, (unsigned int) data->size, data->end);
-      current = succ(current);
-      if (current == NULL) {
-        printf("REEEEEE\n");
-      }
-      printf("This is after succ. The start index is %u, the size is %u, the end is %u\n",current->key, (unsigned int) data->size, data->end);
-      count++;
+      current = current->next;
     }
 
     return NULL;
@@ -104,8 +95,8 @@ void myfree(void *ptr) {
     return;
   }
   TData *currData = node->pdata;
-  TNode *prev = pred(node);
-  TNode *successor = succ(node);
+  TNode *prev = node->prev;
+  TNode *successor = node->next;
   currData->val = 1;
   if (prev != NULL) {
     TData *prevData = prev->pdata;
