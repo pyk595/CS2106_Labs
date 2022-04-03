@@ -38,7 +38,24 @@ void print_map(unsigned char *map, int len) {
 // Returns: Index to stretch of 0's of required length, -1 if no such stretch can be found
 
 long search_map(unsigned char *bitmap, int len, long num_zeroes) {
-    return -1;
+   long i, j, count = 0, index = 0;
+
+   for (i = 0; i < len; i++) {
+     unsigned char mask = 0b10000000;
+     for (j = 0; j < 8; j++) {
+       index++;
+       if (bitmap[i] & mask) {
+         count = 0;
+       } else {
+         count++;
+         if (count == num_zeroes) {
+           return index - num_zeroes;
+         }
+       }
+       mask = mask >> 1;
+     }
+   }
+   return -1;
 } //main
 
 // Set map bits to 0 or 1 depending on whether value is non-zero
@@ -50,8 +67,19 @@ long search_map(unsigned char *bitmap, int len, long num_zeroes) {
 // Returns: Nothing
 
 void set_map(unsigned char *map, long start, long length, int value) {
-}
+  for (int i = start; i < start + length; i++) {
+    long index = i / 8;
+    long offset = i % 8;
+    unsigned char mask = 0b10000000;
+    mask = mask >> offset;
+    if (value) {
+      map[index] = map[index] | mask;
+    } else {
+      map[index] = map[index] & (~mask);
+    }
+  }
 
+}
 // IMPLEMENTED FOR YOU
 // Marks a stretch of bits as "1", representing allocated memory
 // map = Bitmap declared as array of unsigned char
