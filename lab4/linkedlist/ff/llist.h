@@ -15,7 +15,6 @@ void dbprintf(char *format, ...);
 typedef struct td {
     char val; // valid bit
     size_t size; // size
-    unsigned int end; //end index
 } TData;
 
 

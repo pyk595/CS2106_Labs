@@ -26,6 +26,10 @@ void print_node(TNode *node) {
 
 void print_memlist() {
   process_list(_memlist, print_node);
+  if(_memlist->next == NULL && _memlist->pdata->size == MEMSIZE) {
+      free(_memlist->pdata);
+      delete_node(&_memlist, _memlist);
+    }
 }
 
 // Allocates size bytes of memory and returns a pointer
@@ -39,15 +43,13 @@ void *mymalloc(size_t size) {
     TData *data = (TData *) malloc(sizeof(TData));
     data->size = size;
     data->val = 0;
-    data->end = 0 + (unsigned int) size;
     TNode *node = make_node(0, data);
     insert_node(&_memlist, node, ASCENDING);
     
     TData *unusedData = (TData *) malloc(sizeof(TData));
     unusedData->size = MEMSIZE - size;
     unusedData->val = 1;
-    unusedData->end = MEMSIZE;
-    TNode *freeNode = make_node(data->end, unusedData);
+    TNode *freeNode = make_node(node->key + (unsigned int) size, unusedData);
     insert_node(&_memlist, freeNode, ASCENDING);
     return &_heap[0];
   } else {
@@ -60,13 +62,12 @@ void *mymalloc(size_t size) {
         if (data->size >= size) {
           size_t currSize = data->size;
           unsigned int currStart = current->key;
-          delete_node(&_memlist, current);
           free(data);
+          delete_node(&_memlist, current);
 
           TData *newData = (TData *) malloc(sizeof(TData));
           newData->size = size;
           newData->val = 0;
-          newData->end = currStart + (unsigned int) size;
           TNode *node = make_node(currStart, newData);
           insert_node(&_memlist, node, ASCENDING);
 
@@ -74,8 +75,7 @@ void *mymalloc(size_t size) {
             TData *unusedData = (TData *) malloc(sizeof(TData));
             unusedData->size = currSize - size;
             unusedData->val = 1;
-            unusedData->end = newData->end + (unsigned int) unusedData->size;
-            TNode *freeNode = make_node(newData->end, unusedData);
+            TNode *freeNode = make_node(currStart + (unsigned int) size, unusedData);
             insert_node(&_memlist, freeNode, ASCENDING);
           }
           return &_heap[currStart];
@@ -101,23 +101,22 @@ void myfree(void *ptr) {
   if (prev != NULL) {
     TData *prevData = prev->pdata;
     if (prevData->val) {
-      prevData->size = prevData->size + currData->size;
-      prevData->end = prevData->end + currData->size;
-      merge_node(_memlist, node, PRECEDING);
-      free(currData);
       currData = prevData;
-      currData->val = 1;
+      currData->size = currData->size + node->pdata->size;
+      TData *tempData = node->pdata;
+      free(tempData);
+      merge_node(_memlist, node, PRECEDING);
     }
   }
   if (successor != NULL) {
     TData *succData = successor->pdata;
     if (succData->val) {
       currData->size = currData->size + succData->size;
-      currData->end = currData->end + succData->size;
-      merge_node(_memlist, node, SUCCEEDING);
       free(succData);
-      currData->val = 1;
+      merge_node(_memlist, node, SUCCEEDING);
     }
+    currData->val = 1;
+    
   }
 }
 
